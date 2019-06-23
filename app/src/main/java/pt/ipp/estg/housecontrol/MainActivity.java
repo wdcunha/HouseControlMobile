@@ -9,12 +9,15 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature;
+    ImageButton saveBlinder, saveDoor, saveHvac, saveLight, saveTemperature;
 
     TextView showDataTbox, blinder, door, hvac, light, temperature, lblBlinder, lablDoor, lblHvac, lblLight, lblTemperature;
 
@@ -80,6 +84,12 @@ public class MainActivity extends AppCompatActivity {
         inchvac = findViewById(R.id.incHvacBtn);
         inclight = findViewById(R.id.incLightBtn);
         inctemperature = findViewById(R.id.incTemperatureBtn);
+
+        saveBlinder = findViewById(R.id.saveBlinderBtn);
+        saveDoor = findViewById(R.id.saveDoorBtn);
+        saveHvac = findViewById(R.id.saveHvacBtn);
+        saveLight = findViewById(R.id.saveLightBtn);
+        saveTemperature = findViewById(R.id.saveTemperatureBtn);
 
         myFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -142,6 +152,8 @@ public class MainActivity extends AppCompatActivity {
                     szName = myFirebaseUser.getDisplayName();
                     szEmail = myFirebaseUser.getEmail();
                     szUid = myFirebaseUser.getUid();
+
+                    writeNewUser(szUid, szName, szEmail);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + szName + "\n" + szEmail + "\n" + szUid, Toast.LENGTH_LONG).show();
 
@@ -159,6 +171,30 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void writeNewUser(String userId, String name, String email) {
+        Utilizador user = new Utilizador(name, email);
+
+        DatabaseReference usersRef = database.getReference("users");
+
+
+        usersRef.child(userId).setValue(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     public void signInFunc(View view) {
 
@@ -417,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
     public Utilizador readUsersFRD() {
 
-        DatabaseReference usersRef = database.getReference("users");
+        DatabaseReference usersRef  = database.getReference("users");
 
         Utilizador userDataFRD = new Utilizador();
 
@@ -481,8 +517,34 @@ public class MainActivity extends AppCompatActivity {
     private void changeBlinderField(int value) {
 
         blinder.setText(Integer.toString(value));
+
+        saveBlinder.setSaveEnabled(true);
+        saveBlinder.setVisibility(View.VISIBLE);
+
     }
 
+    public void saveBlindChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+
+        sensorRef.child("blinder").setValue(blinder.getText())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for blinder was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for blinder failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+    }
 
     public void increaseDoor(View view) {
         boolean val = Boolean.parseBoolean(String.valueOf(door.getText()));

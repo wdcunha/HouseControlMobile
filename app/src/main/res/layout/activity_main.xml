@@ -145,7 +145,7 @@
         android:id="@+id/doorTxtVw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="152dp"
+        android:layout_marginTop="148dp"
         android:layout_marginEnd="8dp"
         android:enabled="false"
         android:textSize="22sp"
@@ -175,7 +175,7 @@
         android:id="@+id/labelDoor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="124dp"
+        android:layout_marginTop="120dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="@font/advent_pro_semibold"
         android:visibility="invisible"
@@ -254,11 +254,11 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/blinderTxtVw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintEnd_toStartOf="@+id/saveBlinderBtn"
+        app:layout_constraintHorizontal_bias="0.156"
         app:layout_constraintStart_toEndOf="@+id/blinderTxtVw"
         app:layout_constraintTop_toBottomOf="@+id/labelBlinder"
-        app:layout_constraintVertical_bias="0.454" />
+        app:layout_constraintVertical_bias="0.363" />
 
     <Button
         android:id="@+id/decDoorBtn"
@@ -273,7 +273,7 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/doorTxtVw"
-        app:layout_constraintEnd_toStartOf="@+id/blinderTxtVw"
+        app:layout_constraintEnd_toStartOf="@+id/doorTxtVw"
         app:layout_constraintHorizontal_bias="0.917"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/labelDoor"
@@ -292,8 +292,8 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/doorTxtVw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintEnd_toStartOf="@+id/saveBlinderBtn"
+        app:layout_constraintHorizontal_bias="0.156"
         app:layout_constraintStart_toEndOf="@+id/doorTxtVw"
         app:layout_constraintTop_toBottomOf="@+id/labelDoor"
         app:layout_constraintVertical_bias="0.0" />
@@ -330,8 +330,8 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/hvacTxtVw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintEnd_toStartOf="@+id/saveBlinderBtn"
+        app:layout_constraintHorizontal_bias="0.156"
         app:layout_constraintStart_toEndOf="@+id/hvacTxtVw"
         app:layout_constraintTop_toBottomOf="@+id/labelHvac"
         app:layout_constraintVertical_bias="0.0" />
@@ -369,8 +369,8 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/lightTxtVw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintEnd_toStartOf="@+id/saveLightBtn"
+        app:layout_constraintHorizontal_bias="0.156"
         app:layout_constraintStart_toEndOf="@+id/lightTxtVw"
         app:layout_constraintTop_toBottomOf="@+id/labelLight"
         app:layout_constraintVertical_bias="0.0" />
@@ -407,10 +407,78 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/tempTxtVw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.628"
+        app:layout_constraintEnd_toStartOf="@+id/saveTemperatureBtn"
+        app:layout_constraintHorizontal_bias="0.735"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/labelTemperature"
         app:layout_constraintVertical_bias="0.0" />
+
+    <ImageButton
+        android:id="@+id/saveBlinderBtn"
+        android:layout_width="44dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="@android:color/transparent"
+        android:onClick="saveBlindChangeToFRD"
+        android:saveEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/incBlinderBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
+    <ImageButton
+        android:id="@+id/saveDoorBtn"
+        android:layout_width="44dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:saveEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/incDoorBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/incDoorBtn"
+        android:background="@android:color/transparent"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
+    <ImageButton
+        android:id="@+id/saveHvacBtn"
+        android:layout_width="44dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="24dp"
+        android:saveEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/incHvacBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/incHvacBtn"
+        app:layout_constraintVertical_bias="0.0"
+        android:background="@android:color/transparent"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
+    <ImageButton
+        android:id="@+id/saveLightBtn"
+        android:layout_width="44dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:saveEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/incLightBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/incLightBtn"
+        android:background="@android:color/transparent"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
+    <ImageButton
+        android:id="@+id/saveTemperatureBtn"
+        android:layout_width="44dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:saveEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/incTemperatureBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/incTemperatureBtn"
+        android:background="@android:color/transparent"
+        app:srcCompat="@android:drawable/ic_menu_save" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

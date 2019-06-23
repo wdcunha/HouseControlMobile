@@ -1,5 +1,8 @@
 package pt.ipp.estg.housecontrol;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class Sensor {
 
     private String 	blinder,  door, hvac, light, temperature;
