@@ -28,7 +28,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
     // Read from the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature;
+    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature, saveAll;
     ImageButton saveBlinder, saveDoor, saveHvac, saveLight, saveTemperature;
 
     TextView showDataTbox, blinder, door, hvac, light, temperature, lblBlinder, lablDoor, lblHvac, lblLight, lblTemperature;
 
     String multiLineMessage = "";
+
+    String userName, userEmail, userUid = null;
+
 
     public Sensor sensor;
 
@@ -90,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         saveHvac = findViewById(R.id.saveHvacBtn);
         saveLight = findViewById(R.id.saveLightBtn);
         saveTemperature = findViewById(R.id.saveTemperatureBtn);
+        saveAll = findViewById(R.id.saveAllBtn);
 
         myFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -144,18 +150,14 @@ public class MainActivity extends AppCompatActivity {
                 // Successfully signed in
                 FirebaseUser myFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-                String szName = null;
-                String szEmail = null;
-                String szUid = null;
-
                 if (myFirebaseUser != null) {
-                    szName = myFirebaseUser.getDisplayName();
-                    szEmail = myFirebaseUser.getEmail();
-                    szUid = myFirebaseUser.getUid();
+                    userName = myFirebaseUser.getDisplayName();
+                    userEmail = myFirebaseUser.getEmail();
+                    userUid = myFirebaseUser.getUid();
 
-                    writeNewUser(szUid, szName, szEmail);
+                    writeNewUser(userUid, userName, userEmail);
                 }
-                Toast.makeText(MainActivity.this, "User loged in: " + szName + "\n" + szEmail + "\n" + szUid, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
 
 
 
@@ -173,10 +175,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeNewUser(String userId, String name, String email) {
+
         Utilizador user = new Utilizador(name, email);
 
         DatabaseReference usersRef = database.getReference("users");
-
 
         usersRef.child(userId).setValue(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -264,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
                         declight.setVisibility(View.GONE);
                         dectemperature.setEnabled(false);
                         dectemperature.setVisibility(View.GONE);
+
                         incblinder.setEnabled(false);
                         incblinder.setVisibility(View.GONE);
                         incdoor.setEnabled(false);
@@ -274,6 +277,19 @@ public class MainActivity extends AppCompatActivity {
                         inclight.setVisibility(View.GONE);
                         inctemperature.setEnabled(false);
                         inctemperature.setVisibility(View.GONE);
+
+                        saveAll.setEnabled(false);
+                        saveAll.setVisibility(View.GONE);
+                        saveBlinder.setEnabled(false);
+                        saveBlinder.setVisibility(View.GONE);
+                        saveDoor.setEnabled(false);
+                        saveDoor.setVisibility(View.GONE);
+                        saveHvac.setEnabled(false);
+                        saveHvac.setVisibility(View.GONE);
+                        saveLight.setEnabled(false);
+                        saveLight.setVisibility(View.GONE);
+                        saveTemperature.setEnabled(false);
+                        saveTemperature.setVisibility(View.GONE);
 
                     }
                 });
@@ -327,11 +343,24 @@ public class MainActivity extends AppCompatActivity {
         inctemperature.setVisibility(View.GONE);
 
 
+        saveAll.setEnabled(false);
+        saveAll.setVisibility(View.GONE);
+        saveBlinder.setEnabled(false);
+        saveBlinder.setVisibility(View.GONE);
+        saveDoor.setEnabled(false);
+        saveDoor.setVisibility(View.GONE);
+        saveHvac.setEnabled(false);
+        saveHvac.setVisibility(View.GONE);
+        saveLight.setEnabled(false);
+        saveLight.setVisibility(View.GONE);
+        saveTemperature.setEnabled(false);
+        saveTemperature.setVisibility(View.GONE);
+
         multiLineMessage = "";
 
         Sensor sen = readSensorsFRD();
 
-        Utilizador user = readUsersFRD();
+//        Utilizador user = readUsersFRD();
 
 
 //        System.out.println(readUsersFRD().getNome());
@@ -495,9 +524,9 @@ public class MainActivity extends AppCompatActivity {
         if ((val >= 0) && (val < 100)) {
             val += 1;
         }
-//        else {
-//            Toast.makeText(MainActivity.this, "Number out of range: " + val, Toast.LENGTH_LONG).show();
-//        }
+        else {
+            Toast.makeText(MainActivity.this, "Number out of range: " + val, Toast.LENGTH_LONG).show();
+        }
         changeBlinderField(val);
 
     }
@@ -508,9 +537,9 @@ public class MainActivity extends AppCompatActivity {
         if ((val > 0) && (val <= 100)) {
             val -= 1;
         }
-//        else {
-//            Toast.makeText(MainActivity.this, "Number out of range: " + val, Toast.LENGTH_LONG).show();
-//        }
+        else {
+            Toast.makeText(MainActivity.this, "Number out of range: " + val, Toast.LENGTH_LONG).show();
+        }
         changeBlinderField(val);
     }
 
@@ -521,12 +550,18 @@ public class MainActivity extends AppCompatActivity {
         saveBlinder.setSaveEnabled(true);
         saveBlinder.setVisibility(View.VISIBLE);
 
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
     }
 
     public void saveBlindChangeToFRD(View view) {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
-
 
         sensorRef.child("blinder").setValue(blinder.getText())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -543,7 +578,8 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Write for blinder failed!!! " + e, Toast.LENGTH_SHORT).show();
                     }
                 });
-
+        saveBlinder.setSaveEnabled(false);
+        saveBlinder.setVisibility(View.GONE);
     }
 
     public void increaseDoor(View view) {
@@ -565,8 +601,41 @@ public class MainActivity extends AppCompatActivity {
     private void changeDoorField(boolean value) {
 
         door.setText(Boolean.toString(value));
+
+        saveDoor.setSaveEnabled(true);
+        saveDoor.setVisibility(View.VISIBLE);
+
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
     }
 
+    public void saveDoorChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        sensorRef.child("door").setValue(door.getText())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for door was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for door failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveDoor.setSaveEnabled(false);
+        saveDoor.setVisibility(View.GONE);
+    }
 
     public void increaseLight(View view) {
         boolean val = Boolean.parseBoolean(String.valueOf(light.getText()));
@@ -586,6 +655,40 @@ public class MainActivity extends AppCompatActivity {
     private void changeLightField(boolean value) {
 
         light.setText(Boolean.toString(value));
+
+        saveLight.setSaveEnabled(true);
+        saveLight.setVisibility(View.VISIBLE);
+
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public void saveLightChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        sensorRef.child("light").setValue(light.getText())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for light was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for light failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveLight.setSaveEnabled(false);
+        saveLight.setVisibility(View.GONE);
     }
 
 
@@ -615,6 +718,41 @@ public class MainActivity extends AppCompatActivity {
     private void changeTemperatureField(int value) {
 
         temperature.setText(Integer.toString(value));
+
+        saveTemperature.setSaveEnabled(true);
+        saveTemperature.setVisibility(View.VISIBLE);
+
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public void saveTemperatureChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        sensorRef.child("temperature").setValue(temperature.getText())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for temperature was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for temperature failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveTemperature.setSaveEnabled(false);
+        saveTemperature.setVisibility(View.GONE);
+
     }
 
 
@@ -644,8 +782,119 @@ public class MainActivity extends AppCompatActivity {
     private void changeHvacField(int value) {
 
         hvac.setText(Integer.toString(value));
+
+        saveHvac.setSaveEnabled(true);
+        saveHvac.setVisibility(View.VISIBLE);
+
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
     }
 
+    public void saveHvacChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        sensorRef.child("hvac").setValue(hvac.getText())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for hvac was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for hvac failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveHvac.setEnabled(false);
+        saveHvac.setVisibility(View.GONE);
+
+    }
+
+
+    public void saveAllSensorChangesToFRDClick(View view) {
+
+
+        saveAllSensorChangesToFRD((String) blinder.getText(), (String) door.getText(), (String) hvac.getText(), (String) light.getText(), (String) temperature.getText());
+    }
+
+
+    private void saveAllSensorChangesToFRD(String blinder, String door, String hvac, String light, String temperature) {
+
+        Sensor sensors = new Sensor(blinder, door, hvac, light, temperature);
+
+        createDataLogInFRD(blinder, door, hvac, light, temperature);
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        sensorRef.setValue(sensors)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write was successful! ", Toast.LENGTH_SHORT).show();
+                        saveBlinder.setSaveEnabled(false);
+                        saveBlinder.setVisibility(View.GONE);
+                        saveDoor.setSaveEnabled(false);
+                        saveDoor.setVisibility(View.GONE);
+                        saveHvac.setSaveEnabled(false);
+                        saveHvac.setVisibility(View.GONE);
+                        saveLight.setSaveEnabled(false);
+                        saveLight.setVisibility(View.GONE);
+                        saveTemperature.setSaveEnabled(false);
+                        saveTemperature.setVisibility(View.GONE);
+                        saveAll.setEnabled(false);
+                        saveAll.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void createDataLogInFRD(String blinder, String door, String hvac, String light, String temperature) {
+
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss'Z'");
+        String timeStamp = simpleDateFormat.format(new Date());
+        Log.d("MainActivity", "Current Timestamp: " + timeStamp);
+
+        DataChanges createLog = new DataChanges(blinder, door, hvac, light, temperature, timeStamp);
+
+        System.out.println("userId: "+userUid);
+        System.out.println("timeStamp: "+timeStamp);
+
+        DatabaseReference dataChangesRef = database.getReference("Log");
+
+        dataChangesRef.child(userUid).setValue(createLog)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Data Log was saved successfully! ", Toast.LENGTH_SHORT).show();
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Data Log saving failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     public Sensor readSensorsFRD() {
 

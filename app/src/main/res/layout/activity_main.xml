@@ -432,12 +432,13 @@
         android:layout_width="44dp"
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:onClick="saveDoorChangeToFRD"
         android:saveEnabled="false"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/incDoorBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incDoorBtn"
-        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_save" />
 
     <ImageButton
@@ -446,13 +447,14 @@
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
+        android:background="@android:color/transparent"
+        android:onClick="saveHvacChangeToFRD"
         android:saveEnabled="false"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/incHvacBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incHvacBtn"
         app:layout_constraintVertical_bias="0.0"
-        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_save" />
 
     <ImageButton
@@ -460,12 +462,13 @@
         android:layout_width="44dp"
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:onClick="saveLightChangeToFRD"
         android:saveEnabled="false"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/incLightBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incLightBtn"
-        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_save" />
 
     <ImageButton
@@ -473,12 +476,32 @@
         android:layout_width="44dp"
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:onClick="saveTemperatureChangeToFRD"
         android:saveEnabled="false"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/incTemperatureBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incTemperatureBtn"
-        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_save" />
+
+    <Button
+        android:id="@+id/saveAllBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:enabled="false"
+        android:onClick="saveAllSensorChangesToFRDClick"
+        android:text="@string/action_save_all"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/signOutBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.53"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tempTxtVw"
+        app:layout_constraintVertical_bias="0.285" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
