@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     private FirebaseAuth myFirebaseAuth;
     private FirebaseAuth.AuthStateListener myAuthListener;
+    String token = null;
 
     // Read from the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
                     userUid = myFirebaseUser.getUid();
 
                     writeNewUser(userUid, userName, userEmail);
+                    writeNewToken(getTokenFCM(), userName);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
 
@@ -182,6 +184,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public String getCurrentDate() {
+
+        //        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss'Z'");
+        String timeStamp = simpleDateFormat.format(new Date());
+        Log.d("MainActivity", "Current Timestamp: " + timeStamp);
+
+        return timeStamp;
+    }
     /***************************************************************************************************
      *
      * Writes the user info to FRD
@@ -198,14 +209,57 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         // Write was successful!
-                        Toast.makeText(MainActivity.this, "Write was successful! ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Write user was successful! ", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         // Write failed
-                        Toast.makeText(MainActivity.this, "Write failed!!! " + e, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Write user failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    public void showToken(View view) {
+
+        showDataTbox.setText("Token is: "+ getTokenFCM());
+        Log.d(TAG, "Token is: "+getTokenFCM());
+
+    }
+
+    public String getTokenFCM() {
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        token = task.getResult().getToken();
+                    }
+                });
+        return token;
+    }
+
+    private void writeNewToken(String token, String username) {
+
+        DatabaseReference appsInfo = database.getReference("AppsInfo");
+
+        TokenFCM tokenToWrite = new TokenFCM(token, username, getCurrentDate());
+
+        appsInfo.child(userUid).setValue(tokenToWrite)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write token was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write token failed!!! " + e, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -314,20 +368,6 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-    }
-
-
-    public void fsbGetToken(View view) {
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        String token = task.getResult().getToken();
-                        showDataTbox.setText("Token is: "+ token);
-                        Log.d(TAG, "Token is: "+token);
-                    }
-                });
-
     }
 
 
@@ -861,7 +901,7 @@ public class MainActivity extends AppCompatActivity {
 
     /***************************************************************************************************
      *
-     * This part writes to FRD the changes made by user on the screen
+     * This part create log and writes it to FRD the changes made by user on the screen
      */
 
     public void saveAllSensorChangesToFRDClick(View view) {
@@ -916,15 +956,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void createDataLogInFRD(String blinder, String door, String hvac, String light, String temperature) {
 
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss'Z'");
-        String timeStamp = simpleDateFormat.format(new Date());
-        Log.d("MainActivity", "Current Timestamp: " + timeStamp);
-
-        DataChanges createLog = new DataChanges(blinder, door, hvac, light, temperature, timeStamp);
+        DataChanges createLog = new DataChanges(blinder, door, hvac, light, temperature, getCurrentDate());
 
         System.out.println("userId: "+userUid);
-        System.out.println("timeStamp: "+timeStamp);
+        System.out.println("timeStamp: "+getCurrentDate());
 
         DatabaseReference dataChangesRef = database.getReference("Log");
 
