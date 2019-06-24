@@ -27,6 +27,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     // Read from the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature, saveAll;
+    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature,
+            saveAll, getToken;
     ImageButton saveBlinder, saveDoor, saveHvac, saveLight, saveTemperature;
 
     TextView showDataTbox, blinder, door, hvac, light, temperature, lblBlinder, lablDoor, lblHvac, lblLight, lblTemperature;
@@ -97,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
         saveTemperature = findViewById(R.id.saveTemperatureBtn);
         saveAll = findViewById(R.id.saveAllBtn);
 
+        getToken = findViewById(R.id.tokenBtn);
+
         myFirebaseAuth = FirebaseAuth.getInstance();
 
         myAuthListener = new
@@ -146,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 control.setVisibility(View.VISIBLE);
                 showDataTbox.setEnabled(true);
                 showDataTbox.setVisibility(View.VISIBLE);
+                getToken.setEnabled(true);
+                getToken.setVisibility(View.VISIBLE);
 
                 // Successfully signed in
                 FirebaseUser myFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -174,6 +181,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /***************************************************************************************************
+     *
+     * Writes the user info to FRD
+     */
+
     private void writeNewUser(String userId, String name, String email) {
 
         Utilizador user = new Utilizador(name, email);
@@ -196,6 +209,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+    /***************************************************************************************************
+     *
+     * Sign-in and sign-out methods
+     */
 
 
     public void signInFunc(View view) {
@@ -289,11 +308,34 @@ public class MainActivity extends AppCompatActivity {
                         saveLight.setEnabled(false);
                         saveLight.setVisibility(View.GONE);
                         saveTemperature.setEnabled(false);
-                        saveTemperature.setVisibility(View.GONE);
+
+                        getToken.setEnabled(false);
+                        getToken.setVisibility(View.GONE);
 
                     }
                 });
     }
+
+
+    public void fsbGetToken(View view) {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        String token = task.getResult().getToken();
+                        showDataTbox.setText("Token is: "+ token);
+                        Log.d(TAG, "Token is: "+token);
+                    }
+                });
+
+    }
+
+
+    /***************************************************************************************************
+     *
+     * get datas from FRD and show on screen's app
+     */
+
 
     public void getDataFRD(View view) {
 
@@ -320,7 +362,6 @@ public class MainActivity extends AppCompatActivity {
         lblTemperature.setEnabled(false);
         lblTemperature.setVisibility(View.GONE);
 
-
         decblinder.setEnabled(false);
         decblinder.setVisibility(View.GONE);
         decdoor.setEnabled(false);
@@ -342,7 +383,6 @@ public class MainActivity extends AppCompatActivity {
         inctemperature.setEnabled(false);
         inctemperature.setVisibility(View.GONE);
 
-
         saveAll.setEnabled(false);
         saveAll.setVisibility(View.GONE);
         saveBlinder.setEnabled(false);
@@ -362,10 +402,8 @@ public class MainActivity extends AppCompatActivity {
 
 //        Utilizador user = readUsersFRD();
 
-
 //        System.out.println(readUsersFRD().getNome());
 //        System.out.println(readUsersFRD().getEmail());
-
 
 //        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "getTemperature: " + sen.getTemperature();
 
@@ -379,7 +417,6 @@ public class MainActivity extends AppCompatActivity {
 //        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Temperature: " + readSensorsFRD().getTemperature();
 
 //        showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
-
 
     }
 
@@ -479,7 +516,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     public Utilizador readUsersFRD() {
 
         DatabaseReference usersRef  = database.getReference("users");
@@ -516,6 +552,10 @@ public class MainActivity extends AppCompatActivity {
         return userDataFRD;
     }
 
+    /***************************************************************************************************
+     *
+     * This code block is responsible to create control for increase and decrease values for sensors
+     */
 
 
     public void increaseBlinder(View view) {
@@ -819,11 +859,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /***************************************************************************************************
+     *
+     * This part writes to FRD the changes made by user on the screen
+     */
 
     public void saveAllSensorChangesToFRDClick(View view) {
 
 
         saveAllSensorChangesToFRD((String) blinder.getText(), (String) door.getText(), (String) hvac.getText(), (String) light.getText(), (String) temperature.getText());
+
     }
 
 
@@ -864,6 +909,11 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /***************************************************************************************************
+     *
+     * This method creates a Log to have an history of changes and write it in FRD
+     */
+
     private void createDataLogInFRD(String blinder, String door, String hvac, String light, String temperature) {
 
 //        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -895,6 +945,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+    /***************************************************************************************************
+     *
+     * Code for reading infos from existing in FRD and show them on screen app
+     */
 
     public Sensor readSensorsFRD() {
 
