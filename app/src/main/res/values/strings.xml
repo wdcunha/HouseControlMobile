@@ -11,4 +11,5 @@
     <string name="action_increase">"&gt;"</string>
     <string name="action_save_all">"Save All"</string>
     <string name="action_get_token">"Token"</string>
+    <string name="todo">TODO</string>
 </resources>
