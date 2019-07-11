@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth myFirebaseAuth;
     private FirebaseAuth.AuthStateListener myAuthListener;
     String token = null;
-
+    public final static int ONE_SECOND = 1000;
     // Read from the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -142,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
                         if (myFirebaseuser != null) {
                             // Utilizador autenticado
                             Toast.makeText(MainActivity.this, "User Authenticated!! " + myFirebaseuser, Toast.LENGTH_SHORT).show();
+                            showDataTbox.setText("onAuthStateChanged");
+
 
                         } else {
                             // Utilizador não autenticado
@@ -161,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = myFirebaseAuth.getCurrentUser();
         Toast.makeText(MainActivity.this, "Current user: " + currentUser, Toast.LENGTH_LONG).show();
 //        updateUI(currentUser);
+        showDataTbox.setText("onStart");
+
     }
 
     @Override
@@ -194,11 +198,9 @@ public class MainActivity extends AppCompatActivity {
                     userUid = myFirebaseUser.getUid();
 
                     writeNewUser(userUid, userName, userEmail);
-                    String token = getTokenFCM();
-                    writeNewToken(token, userName);
+                    writeNewToken(getTokenFCM(), userName);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
-
 
 
                 // ...
@@ -259,7 +261,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void showToken(View view) {
 
-        showDataTbox.setText("Token is: "+ getTokenFCM());
+//        showDataTbox.setText("Token is: "+ getTokenFCM());
+        showDataTbox.setText(getTokenFCM());
         Log.d(TAG, "Token is: "+getTokenFCM());
 
     }
@@ -275,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
                 });
         return token;
     }
+
 
     private void writeNewToken(String token, String username) {
 
