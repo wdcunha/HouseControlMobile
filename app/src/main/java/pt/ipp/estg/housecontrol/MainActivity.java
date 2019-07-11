@@ -55,11 +55,11 @@ public class MainActivity extends AppCompatActivity {
     // Read from the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, declight, dectemperature,incblinder, incdoor, inchvac, inclight, inctemperature,
+    Button signin, signout, getdata, control, decblinder, decdoor, dechvac, dechvacIsOn, declight, dectemperature,incblinder, incdoor, inchvac, inchvacIsOn, inclight, inctemperature,
             saveAll, getToken;
-    ImageButton saveBlinder, saveDoor, saveHvac, saveLight, saveTemperature;
+    ImageButton saveBlinder, saveDoor, saveHvac, saveHvacIsOn, saveLight, saveTemperature;
 
-    TextView showDataTbox, blinder, door, hvac, light, temperature, lblBlinder, lablDoor, lblHvac, lblLight, lblTemperature;
+    TextView showDataTbox, blinder, door, hvac, hvacIsOn, light, temperature, lblBlinder, lablDoor, lblHvac, lblHvacIsOn, lblLight, lblTemperature;
 
     String multiLineMessage = "";
 
@@ -84,11 +84,13 @@ public class MainActivity extends AppCompatActivity {
         blinder = findViewById(R.id.blinderTxtVw);
         door = findViewById(R.id.doorTxtVw);
         hvac = findViewById(R.id.hvacTxtVw);
+        hvacIsOn = findViewById(R.id.hvacIsOnTxtVw);
         light = findViewById(R.id.lightTxtVw);
         temperature = findViewById(R.id.tempTxtVw);
         lblBlinder = findViewById(R.id.labelBlinder);
         lablDoor = findViewById(R.id.labelDoor);
         lblHvac = findViewById(R.id.labelHvac);
+        lblHvacIsOn = findViewById(R.id.labelHvacIsOn);
         lblLight = findViewById(R.id.labelLight);
         lblTemperature = findViewById(R.id.labelTemperature);
         showDataTbox = findViewById(R.id.showDataTbox);
@@ -97,17 +99,20 @@ public class MainActivity extends AppCompatActivity {
         decblinder = findViewById(R.id.decBlinderBtn);
         decdoor = findViewById(R.id.decDoorBtn);
         dechvac = findViewById(R.id.decHvacBtn);
+        dechvacIsOn = findViewById(R.id.decHvacIsOnBtn);
         declight = findViewById(R.id.decLightBtn);
         dectemperature = findViewById(R.id.decTemperatureBtn);
         incblinder = findViewById(R.id.incBlinderBtn);
         incdoor = findViewById(R.id.incDoorBtn);
         inchvac = findViewById(R.id.incHvacBtn);
+        inchvacIsOn = findViewById(R.id.incHvacIsOnBtn);
         inclight = findViewById(R.id.incLightBtn);
         inctemperature = findViewById(R.id.incTemperatureBtn);
 
         saveBlinder = findViewById(R.id.saveBlinderBtn);
         saveDoor = findViewById(R.id.saveDoorBtn);
         saveHvac = findViewById(R.id.saveHvacBtn);
+        saveHvacIsOn = findViewById(R.id.saveHvacIsOnBtn);
         saveLight = findViewById(R.id.saveLightBtn);
         saveTemperature = findViewById(R.id.saveTemperatureBtn);
         saveAll = findViewById(R.id.saveAllBtn);
@@ -189,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
                     userUid = myFirebaseUser.getUid();
 
                     writeNewUser(userUid, userName, userEmail);
-                    writeNewToken(getTokenFCM(), userName);
+                    String token = getTokenFCM();
+                    writeNewToken(token, userName);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
 
@@ -274,6 +280,8 @@ public class MainActivity extends AppCompatActivity {
 
         DatabaseReference appsInfo = database.getReference("AppsInfo");
 
+        Toast.makeText(MainActivity.this, "Token: "+token, Toast.LENGTH_SHORT).show();
+
         TokenFCM tokenToWrite = new TokenFCM(token, username, getCurrentDate());
 
         appsInfo.child(userUid).setValue(tokenToWrite)
@@ -343,6 +351,8 @@ public class MainActivity extends AppCompatActivity {
                         door.setVisibility(View.GONE);
                         hvac.setEnabled(false);
                         hvac.setVisibility(View.GONE);
+                        hvacIsOn.setEnabled(false);
+                        hvacIsOn.setVisibility(View.GONE);
                         light.setEnabled(false);
                         light.setVisibility(View.GONE);
                         temperature.setEnabled(false);
@@ -353,6 +363,8 @@ public class MainActivity extends AppCompatActivity {
                         lablDoor.setVisibility(View.GONE);
                         lblHvac.setEnabled(false);
                         lblHvac.setVisibility(View.GONE);
+                        lblHvacIsOn.setEnabled(false);
+                        lblHvacIsOn.setVisibility(View.GONE);
                         lblLight.setEnabled(false);
                         lblLight.setVisibility(View.GONE);
                         lblTemperature.setEnabled(false);
@@ -364,6 +376,8 @@ public class MainActivity extends AppCompatActivity {
                         decdoor.setVisibility(View.GONE);
                         dechvac.setEnabled(false);
                         dechvac.setVisibility(View.GONE);
+                        dechvacIsOn.setEnabled(false);
+                        dechvacIsOn.setVisibility(View.GONE);
                         declight.setEnabled(false);
                         declight.setVisibility(View.GONE);
                         dectemperature.setEnabled(false);
@@ -375,6 +389,8 @@ public class MainActivity extends AppCompatActivity {
                         incdoor.setVisibility(View.GONE);
                         inchvac.setEnabled(false);
                         inchvac.setVisibility(View.GONE);
+                        inchvacIsOn.setEnabled(false);
+                        inchvacIsOn.setVisibility(View.GONE);
                         inclight.setEnabled(false);
                         inclight.setVisibility(View.GONE);
                         inctemperature.setEnabled(false);
@@ -388,6 +404,8 @@ public class MainActivity extends AppCompatActivity {
                         saveDoor.setVisibility(View.GONE);
                         saveHvac.setEnabled(false);
                         saveHvac.setVisibility(View.GONE);
+                        saveHvacIsOn.setEnabled(false);
+                        saveHvacIsOn.setVisibility(View.GONE);
                         saveLight.setEnabled(false);
                         saveLight.setVisibility(View.GONE);
                         saveTemperature.setEnabled(false);
@@ -417,6 +435,8 @@ public class MainActivity extends AppCompatActivity {
         door.setVisibility(View.GONE);
         hvac.setEnabled(false);
         hvac.setVisibility(View.GONE);
+        hvacIsOn.setEnabled(false);
+        hvacIsOn.setVisibility(View.GONE);
         light.setEnabled(false);
         light.setVisibility(View.GONE);
         temperature.setEnabled(false);
@@ -427,6 +447,8 @@ public class MainActivity extends AppCompatActivity {
         lablDoor.setVisibility(View.GONE);
         lblHvac.setEnabled(false);
         lblHvac.setVisibility(View.GONE);
+        lblHvacIsOn.setEnabled(false);
+        lblHvacIsOn.setVisibility(View.GONE);
         lblLight.setEnabled(false);
         lblLight.setVisibility(View.GONE);
         lblTemperature.setEnabled(false);
@@ -438,6 +460,8 @@ public class MainActivity extends AppCompatActivity {
         decdoor.setVisibility(View.GONE);
         dechvac.setEnabled(false);
         dechvac.setVisibility(View.GONE);
+        dechvacIsOn.setEnabled(false);
+        dechvacIsOn.setVisibility(View.GONE);
         declight.setEnabled(false);
         declight.setVisibility(View.GONE);
         dectemperature.setEnabled(false);
@@ -448,6 +472,8 @@ public class MainActivity extends AppCompatActivity {
         incdoor.setVisibility(View.GONE);
         inchvac.setEnabled(false);
         inchvac.setVisibility(View.GONE);
+        inchvacIsOn.setEnabled(false);
+        inchvacIsOn.setVisibility(View.GONE);
         inclight.setEnabled(false);
         inclight.setVisibility(View.GONE);
         inctemperature.setEnabled(false);
@@ -461,6 +487,8 @@ public class MainActivity extends AppCompatActivity {
         saveDoor.setVisibility(View.GONE);
         saveHvac.setEnabled(false);
         saveHvac.setVisibility(View.GONE);
+        saveHvacIsOn.setEnabled(false);
+        saveHvacIsOn.setVisibility(View.GONE);
         saveLight.setEnabled(false);
         saveLight.setVisibility(View.GONE);
         saveTemperature.setEnabled(false);
@@ -482,6 +510,8 @@ public class MainActivity extends AppCompatActivity {
         door.setVisibility(View.VISIBLE);
         hvac.setEnabled(true);
         hvac.setVisibility(View.VISIBLE);
+        hvacIsOn.setEnabled(true);
+        hvacIsOn.setVisibility(View.VISIBLE);
         light.setEnabled(true);
         light.setVisibility(View.VISIBLE);
         temperature.setEnabled(true);
@@ -492,6 +522,8 @@ public class MainActivity extends AppCompatActivity {
         lablDoor.setVisibility(View.VISIBLE);
         lblHvac.setEnabled(true);
         lblHvac.setVisibility(View.VISIBLE);
+        lblHvacIsOn.setEnabled(true);
+        lblHvacIsOn.setVisibility(View.VISIBLE);
         lblLight.setEnabled(true);
         lblLight.setVisibility(View.VISIBLE);
         lblTemperature.setEnabled(true);
@@ -503,6 +535,8 @@ public class MainActivity extends AppCompatActivity {
         decdoor.setVisibility(View.VISIBLE);
         dechvac.setEnabled(true);
         dechvac.setVisibility(View.VISIBLE);
+        dechvacIsOn.setEnabled(true);
+        dechvacIsOn.setVisibility(View.VISIBLE);
         declight.setEnabled(true);
         declight.setVisibility(View.VISIBLE);
         dectemperature.setEnabled(true);
@@ -513,6 +547,8 @@ public class MainActivity extends AppCompatActivity {
         incdoor.setVisibility(View.VISIBLE);
         inchvac.setEnabled(true);
         inchvac.setVisibility(View.VISIBLE);
+        inchvacIsOn.setEnabled(true);
+        inchvacIsOn.setVisibility(View.VISIBLE);
         inclight.setEnabled(true);
         inclight.setVisibility(View.VISIBLE);
         inctemperature.setEnabled(true);
@@ -551,8 +587,10 @@ public class MainActivity extends AppCompatActivity {
                             recbHvacData = parseData(ds.getValue().toString());
 
                             sensorsValueShow.setHvac("On/off: "+((HVAC)recbHvacData).isOn()+", Temp: "+recbHvacData.getValue());
-                            lblHvac.setText(ds.getKey());
+                            lblHvac.setText(ds.getKey()+"(Temp)");
+                            lblHvacIsOn.setText(ds.getKey()+"(On/off)");
                             hvac.setText(String.valueOf(recbHvacData.getValue()));
+                            hvacIsOn.setText(String.valueOf(((HVAC)recbHvacData).isOn()));
                             break;
                         case "light":
                             recbLightData = parseData(ds.getValue().toString());
@@ -654,7 +692,7 @@ public class MainActivity extends AppCompatActivity {
         saveBlinder.setVisibility(View.VISIBLE);
 
         if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
-                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
 
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
@@ -710,7 +748,7 @@ public class MainActivity extends AppCompatActivity {
         saveDoor.setVisibility(View.VISIBLE);
 
         if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
-                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
 
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
@@ -766,7 +804,7 @@ public class MainActivity extends AppCompatActivity {
         saveLight.setVisibility(View.VISIBLE);
 
         if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
-                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
 
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
@@ -779,7 +817,7 @@ public class MainActivity extends AppCompatActivity {
 
         ((Light)recbLightData).setIsOn(Boolean.parseBoolean(String.valueOf(light.getText())));
 
-        sensorRef.child("light").setValue(recbLightData)
+        sensorRef.child("light").setValue(recbLightData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -830,7 +868,7 @@ public class MainActivity extends AppCompatActivity {
         saveTemperature.setVisibility(View.VISIBLE);
 
         if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
-                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
 
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
@@ -844,7 +882,7 @@ public class MainActivity extends AppCompatActivity {
 
         recbTemperaturerData.setValue(parseInt(String.valueOf(temperature.getText())));
 
-        sensorRef.child("temperature").setValue(recbTemperaturerData)
+        sensorRef.child("temperature").setValue(recbTemperaturerData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -896,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
         saveHvac.setVisibility(View.VISIBLE);
 
         if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
-                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE) {
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
 
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
@@ -910,7 +948,7 @@ public class MainActivity extends AppCompatActivity {
 
         recbHvacData.setValue(parseInt(String.valueOf(hvac.getText())));
 
-        sensorRef.child("hvac").setValue(recbHvacData)
+        sensorRef.child("hvac").setValue(recbHvacData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -930,6 +968,64 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    public void increaseHvacIsOn(View view) {
+        boolean val = Boolean.parseBoolean(String.valueOf(hvacIsOn.getText()));
+
+        if (val == false) val = true;
+        changeHvacIsOnField(val);
+
+    }
+
+    public void decreaseHvacIsOn(View view) {
+        boolean val = Boolean.parseBoolean(String.valueOf(hvacIsOn.getText()));
+
+        if (val == true) val = false;
+        changeHvacIsOnField(val);
+    }
+
+    private void changeHvacIsOnField(boolean value) {
+
+        hvacIsOn.setText(Boolean.toString(value));
+
+        saveHvacIsOn.setSaveEnabled(true);
+        saveHvacIsOn.setVisibility(View.VISIBLE);
+
+        if (saveBlinder.getVisibility() == View.VISIBLE && saveDoor.getVisibility() == View.VISIBLE && saveHvac.getVisibility() == View.VISIBLE
+                && saveLight.getVisibility() == View.VISIBLE && saveTemperature.getVisibility() == View.VISIBLE && saveHvacIsOn.getVisibility() == View.VISIBLE) {
+
+            saveAll.setEnabled(true);
+            saveAll.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public void saveHvacIsOnChangeToFRD(View view) {
+
+        DatabaseReference sensorRef = database.getReference("Sensor");
+
+        ((HVAC)recbHvacData).setIsOn(Boolean.parseBoolean(String.valueOf(hvacIsOn.getText())));
+
+        sensorRef.child("hvac").setValue(recbHvacData.toString())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Write for hvacIsOn was successful! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Write for hvacIsOn failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveHvacIsOn.setEnabled(false);
+        saveHvacIsOn.setVisibility(View.GONE);
+
+    }
+
     /***************************************************************************************************
      *
      * This part create log and writes it to FRD the changes made by user on the screen
@@ -938,12 +1034,12 @@ public class MainActivity extends AppCompatActivity {
     public void saveAllSensorChangesToFRDClick(View view) {
 
 
-        saveAllSensorChangesToFRD((String) blinder.getText(), (String) door.getText(), (String) hvac.getText(), (String) light.getText(), (String) temperature.getText());
+        saveAllSensorChangesToFRD((String) blinder.getText(), (String) door.getText(), (String) hvac.getText(), (String) hvacIsOn.getText(), (String) light.getText(), (String) temperature.getText());
 
     }
 
 
-    private void saveAllSensorChangesToFRD(String blinder, String door, String hvac, String light, String temperature) {
+    private void saveAllSensorChangesToFRD(String blinder, String door, String hvac, String hvacIsOn, String light, String temperature) {
 
         SensorsValueShow sensorsValueShow = new SensorsValueShow(blinder, door, hvac, light, temperature);
 
@@ -963,6 +1059,8 @@ public class MainActivity extends AppCompatActivity {
                         saveDoor.setVisibility(View.GONE);
                         saveHvac.setSaveEnabled(false);
                         saveHvac.setVisibility(View.GONE);
+                        saveHvacIsOn.setSaveEnabled(false);
+                        saveHvacIsOn.setVisibility(View.GONE);
                         saveLight.setSaveEnabled(false);
                         saveLight.setVisibility(View.GONE);
                         saveTemperature.setSaveEnabled(false);
