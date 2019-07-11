@@ -562,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
 
         sensorsValueShow = new SensorsValueShow();
 
-        sensorRef.addValueEventListener(new ValueEventListener() {
+        sensorRef.child("server").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -705,7 +705,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveBlindChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         recbBlinderData.setValue(parseInt(String.valueOf(blinder.getText())));
 
@@ -762,7 +762,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveDoorChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         ((Door)recbDoorData).setIsOpen(Boolean.parseBoolean(String.valueOf(door.getText())));
 
@@ -817,7 +817,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveLightChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         ((Light)recbLightData).setIsOn(Boolean.parseBoolean(String.valueOf(light.getText())));
 
@@ -882,7 +882,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveTemperatureChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         recbTemperaturerData.setValue(parseInt(String.valueOf(temperature.getText())));
 
@@ -948,7 +948,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveHvacChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         recbHvacData.setValue(parseInt(String.valueOf(hvac.getText())));
 
@@ -1006,7 +1006,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveHvacIsOnChangeToFRD(View view) {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         ((HVAC)recbHvacData).setIsOn(Boolean.parseBoolean(String.valueOf(hvacIsOn.getText())));
 
@@ -1126,7 +1126,7 @@ public class MainActivity extends AppCompatActivity {
 
         sensorsValueShow = new SensorsValueShow();
 
-        sensorRef.addValueEventListener(new ValueEventListener() {
+        sensorRef.child("server").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
