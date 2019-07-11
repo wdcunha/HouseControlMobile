@@ -425,7 +425,8 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/incBlinderBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:contentDescription="@string/todo" />
 
     <ImageButton
         android:id="@+id/saveDoorBtn"
@@ -439,7 +440,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/incDoorBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incDoorBtn"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:contentDescription="TODO" />
 
     <ImageButton
         android:id="@+id/saveHvacBtn"
@@ -455,7 +457,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incHvacBtn"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:contentDescription="TODO" />
 
     <ImageButton
         android:id="@+id/saveLightBtn"
@@ -469,7 +472,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/incLightBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incLightBtn"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:contentDescription="TODO" />
 
     <ImageButton
         android:id="@+id/saveTemperatureBtn"
@@ -483,7 +487,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/incTemperatureBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/incTemperatureBtn"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:contentDescription="TODO" />
 
     <Button
         android:id="@+id/saveAllBtn"

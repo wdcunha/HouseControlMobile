@@ -1,8 +1,6 @@
 package pt.ipp.estg.housecontrol;
 
 import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
@@ -12,6 +10,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -35,6 +36,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import pt.ipp.estg.housecontrol.Sensors.Door;
+import pt.ipp.estg.housecontrol.Sensors.HVAC;
+import pt.ipp.estg.housecontrol.Sensors.Light;
+import pt.ipp.estg.housecontrol.Sensors.Sensor;
+
+import static java.lang.Integer.parseInt;
+import static pt.ipp.estg.housecontrol.Sensors.TreatMsgReceived.parseData;
+
+
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "MainActivity";
@@ -55,8 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
     String userName, userEmail, userUid = null;
 
+    Sensor recbBlinderData, recbDoorData, recbHvacData, recbLightData, recbTemperaturerData;
 
-    public Sensor sensor;
+    SensorsValueShow sensorsValueShow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +113,20 @@ public class MainActivity extends AppCompatActivity {
         saveAll = findViewById(R.id.saveAllBtn);
 
         getToken = findViewById(R.id.tokenBtn);
+
+        Intent intent = getIntent();
+
+        if (getIntent() != null){
+
+            String fName = intent.getStringExtra("Title");
+            String lName = intent.getStringExtra("Body");
+
+            showDataTbox.setEnabled(true);
+            showDataTbox.setVisibility(View.VISIBLE);
+
+            showDataTbox.setText(fName+ "\n" + lName);
+        }
+
 
         myFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -221,6 +246,10 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /***************************************************************************************************
+     *
+     * This methods treat about token, specially for saving it in FRD
+     */
 
     public void showToken(View view) {
 
@@ -374,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
     /***************************************************************************************************
      *
      * get datas from FRD and show on screen's app
+     *
      */
 
 
@@ -438,25 +468,7 @@ public class MainActivity extends AppCompatActivity {
 
         multiLineMessage = "";
 
-        Sensor sen = readSensorsFRD();
-
-//        Utilizador user = readUsersFRD();
-
-//        System.out.println(readUsersFRD().getNome());
-//        System.out.println(readUsersFRD().getEmail());
-
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "getTemperature: " + sen.getTemperature();
-
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Nome: " + readUsersFRD().getNome();
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Email: " + readUsersFRD().getEmail();
-//
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Blinder: " + readSensorsFRD().getBlinder();
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Door: " + readSensorsFRD().getDoor();
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Hvac: " + readSensorsFRD().getHvac();
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Light: " + readSensorsFRD().getLight();
-//        multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Temperature: " + readSensorsFRD().getTemperature();
-
-//        showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
+        SensorsValueShow sen = readSensorsFRD();
 
     }
 
@@ -508,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensor = new Sensor();
+        sensorsValueShow = new SensorsValueShow();
 
         sensorRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -520,29 +532,41 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (ds.getKey()){
                         case "blinder":
-                            sensor.setBlinder(ds.getValue().toString());
+                            System.out.println("blinder ds.getValue(): "+ ds.getValue());
+                            recbBlinderData = parseData(ds.getValue().toString());
+                            System.out.println("----> recbBlinderData.getValue: "+ recbBlinderData.getValue());
+
+                            sensorsValueShow.setBlinder(String.valueOf(recbBlinderData.getValue()));
                             lblBlinder.setText(ds.getKey());
-                            blinder.setText(ds.getValue().toString());
+                            blinder.setText(String.valueOf(recbBlinderData.getValue()));
                             break;
                         case "door":
-                            sensor.setDoor(ds.getValue().toString());
+                            recbDoorData = parseData(ds.getValue().toString());
+
+                            sensorsValueShow.setDoor(String.valueOf(((Door)recbDoorData).isOpen()));
                             lablDoor.setText(ds.getKey());
-                            door.setText(ds.getValue().toString());
+                            door.setText(String.valueOf(((Door)recbDoorData).isOpen()));
                             break;
                         case "hvac":
-                            sensor.setHvac(ds.getValue().toString());
+                            recbHvacData = parseData(ds.getValue().toString());
+
+                            sensorsValueShow.setHvac("On/off: "+((HVAC)recbHvacData).isOn()+", Temp: "+recbHvacData.getValue());
                             lblHvac.setText(ds.getKey());
-                            hvac.setText(ds.getValue().toString());
+                            hvac.setText(String.valueOf(recbHvacData.getValue()));
                             break;
                         case "light":
-                            light.setText(ds.getValue().toString());
+                            recbLightData = parseData(ds.getValue().toString());
+
+                            sensorsValueShow.setLight(String.valueOf(recbLightData.getValue()));
                             lblLight.setText(ds.getKey());
-                            sensor.setLight(ds.getValue().toString());
+                            light.setText(String.valueOf(((Light)recbLightData).isOn()));
                             break;
                         case "temperature":
-                            temperature.setText(ds.getValue().toString());
+                            recbTemperaturerData = parseData(ds.getValue().toString());
+
+                            sensorsValueShow.setTemperature(String.valueOf(recbTemperaturerData.getValue()));
                             lblTemperature.setText(ds.getKey());
-                            sensor.setTemperature(ds.getValue().toString());
+                            temperature.setText(String.valueOf(recbTemperaturerData.getValue()));
                             break;
                     }
                 }
@@ -551,7 +575,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
-                Log.w(TAG, "Failed to read Sensor value from loadSensorsFRD method!", error.toException());
+                Log.w(TAG, "Failed to read SensorsValueShow value from loadSensorsFRD method!", error.toException());
             }
         });
     }
@@ -575,7 +599,6 @@ public class MainActivity extends AppCompatActivity {
                     multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Nome: " + userDataFRD.getNome();
                     multiLineMessage = multiLineMessage + "&lt;br&gt;" + "Email: " + userDataFRD.getEmail();
 
-                    System.out.println("Email: " + userDataFRD.getEmail());
                 }
 
                 showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
@@ -594,12 +617,12 @@ public class MainActivity extends AppCompatActivity {
 
     /***************************************************************************************************
      *
-     * This code block is responsible to create control for increase and decrease values for sensors
+     * This code block is responsible to create control for increase and decrease values for sensorsValueShow
      */
 
 
     public void increaseBlinder(View view) {
-        int val = Integer.parseInt(String.valueOf(blinder.getText()));
+        int val = parseInt(String.valueOf(blinder.getText()));
 
         if ((val >= 0) && (val < 100)) {
             val += 1;
@@ -612,7 +635,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void decreaseBlinder(View view) {
-        int val = Integer.parseInt(String.valueOf(blinder.getText()));
+        int val = parseInt(String.valueOf(blinder.getText()));
 
         if ((val > 0) && (val <= 100)) {
             val -= 1;
@@ -636,14 +659,15 @@ public class MainActivity extends AppCompatActivity {
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
         }
-
     }
 
     public void saveBlindChangeToFRD(View view) {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.child("blinder").setValue(blinder.getText())
+        recbBlinderData.setValue(parseInt(String.valueOf(blinder.getText())));
+
+        sensorRef.child("blinder").setValue(recbBlinderData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -698,7 +722,9 @@ public class MainActivity extends AppCompatActivity {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.child("door").setValue(door.getText())
+        ((Door)recbDoorData).setIsOpen(Boolean.parseBoolean(String.valueOf(door.getText())));
+
+        sensorRef.child("door").setValue(recbDoorData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -745,14 +771,15 @@ public class MainActivity extends AppCompatActivity {
             saveAll.setEnabled(true);
             saveAll.setVisibility(View.VISIBLE);
         }
-
     }
 
     public void saveLightChangeToFRD(View view) {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.child("light").setValue(light.getText())
+        ((Light)recbLightData).setIsOn(Boolean.parseBoolean(String.valueOf(light.getText())));
+
+        sensorRef.child("light").setValue(recbLightData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -773,7 +800,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void increaseTemperature(View view) {
-        int val = Integer.parseInt(String.valueOf(temperature.getText()));
+        int val = parseInt(String.valueOf(temperature.getText()));
 
         if ((val >= 15) && (val < 30)) {
             val += 1;
@@ -785,7 +812,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void decreaseTemperature(View view) {
-        int val = Integer.parseInt(String.valueOf(temperature.getText()));
+        int val = parseInt(String.valueOf(temperature.getText()));
 
         if ((val > 15) && (val <= 30)) {
             val -= 1;
@@ -815,7 +842,9 @@ public class MainActivity extends AppCompatActivity {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.child("temperature").setValue(temperature.getText())
+        recbTemperaturerData.setValue(parseInt(String.valueOf(temperature.getText())));
+
+        sensorRef.child("temperature").setValue(recbTemperaturerData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -837,7 +866,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void increaseHvac(View view) {
-        int val = Integer.parseInt(String.valueOf(hvac.getText()));
+        int val = parseInt(String.valueOf(hvac.getText()));
 
         if ((val >= 15) && (val < 30)) {
             val += 1;
@@ -849,7 +878,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void decreaseHvac(View view) {
-        int val = Integer.parseInt(String.valueOf(hvac.getText()));
+        int val = parseInt(String.valueOf(hvac.getText()));
 
         if ((val > 15) && (val <= 30)) {
             val -= 1;
@@ -879,7 +908,9 @@ public class MainActivity extends AppCompatActivity {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.child("hvac").setValue(hvac.getText())
+        recbHvacData.setValue(parseInt(String.valueOf(hvac.getText())));
+
+        sensorRef.child("hvac").setValue(recbHvacData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -914,13 +945,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveAllSensorChangesToFRD(String blinder, String door, String hvac, String light, String temperature) {
 
-        Sensor sensors = new Sensor(blinder, door, hvac, light, temperature);
+        SensorsValueShow sensorsValueShow = new SensorsValueShow(blinder, door, hvac, light, temperature);
 
         createDataLogInFRD(blinder, door, hvac, light, temperature);
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensorRef.setValue(sensors)
+        sensorRef.setValue(sensorsValueShow)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -987,11 +1018,11 @@ public class MainActivity extends AppCompatActivity {
      * Code for reading infos from existing in FRD and show them on screen app
      */
 
-    public Sensor readSensorsFRD() {
+    public SensorsValueShow readSensorsFRD() {
 
         DatabaseReference sensorRef = database.getReference("Sensor");
 
-        sensor = new Sensor();
+        sensorsValueShow = new SensorsValueShow();
 
         sensorRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -1002,7 +1033,7 @@ public class MainActivity extends AppCompatActivity {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()){
 
-//                    Sensor sensorDataFRD = ds.getValue(Sensor.class);
+//                    SensorsValueShow sensorDataFRD = ds.getValue(SensorsValueShow.class);
 //                    System.out.println("Temperature: " + sensorDataFRD.getTemperature());
 //                    multiLineMessage = "Temperature: " + sensorDataFRD.getTemperature() + "&lt;br&gt;" + multiLineMessage;
 //                    System.out.println("Blinder: " + sensorDataFRD.getBlinder());
@@ -1023,31 +1054,31 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (ds.getKey()){
                         case "blinder":
-                            sensor.setBlinder(ds.getValue().toString());
-                            System.out.println("switchgetBlinder: " + sensor.getBlinder());
-                            multiLineMessage = "Blinder: " + sensor.getBlinder() + "&lt;br&gt;" + multiLineMessage;
+                            sensorsValueShow.setBlinder(ds.getValue().toString());
+                            System.out.println("switchgetBlinder: " + sensorsValueShow.getBlinder());
+                            multiLineMessage = "Blinder: " + sensorsValueShow.getBlinder() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "door":
-                            sensor.setDoor(ds.getValue().toString());
-                            System.out.println("switchgetDoor: " + sensor.getDoor());
-                            multiLineMessage = "Door: " + sensor.getDoor() + "&lt;br&gt;" + multiLineMessage;
+                            sensorsValueShow.setDoor(ds.getValue().toString());
+                            System.out.println("switchgetDoor: " + sensorsValueShow.getDoor());
+                            multiLineMessage = "Door: " + sensorsValueShow.getDoor() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "hvac":
-                            sensor.setHvac(ds.getValue().toString());
-                            System.out.println("switchgetHvac: " + sensor.getHvac());
-                            multiLineMessage = "Hvac: " + sensor.getHvac() + "&lt;br&gt;" + multiLineMessage;
+                            sensorsValueShow.setHvac(ds.getValue().toString());
+                            System.out.println("switchgetHvac: " + sensorsValueShow.getHvac());
+                            multiLineMessage = "Hvac: " + sensorsValueShow.getHvac() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "light":
-                            sensor.setLight(ds.getValue().toString());
-                            System.out.println("switchgetLight: " + sensor.getLight());
-                            multiLineMessage = "Light: " + sensor.getLight() + "&lt;br&gt;" + multiLineMessage;
+                            sensorsValueShow.setLight(ds.getValue().toString());
+                            System.out.println("switchgetLight: " + sensorsValueShow.getLight());
+                            multiLineMessage = "Light: " + sensorsValueShow.getLight() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "temperature":
-//                            MainActivity.this.sensor.setTemperature(ds.getValue().toString());
+//                            MainActivity.this.sensorsValueShow.setTemperature(ds.getValue().toString());
 //                            showDataTbox.setText(ds.getValue().toString());
-                            sensor.setTemperature(ds.getValue().toString());
-                            System.out.println("switchgetTemperature: " + sensor.getTemperature());
-                            multiLineMessage = "Temperature: " + sensor.getTemperature() + "&lt;br&gt;" + multiLineMessage;
+                            sensorsValueShow.setTemperature(ds.getValue().toString());
+                            System.out.println("switchgetTemperature: " + sensorsValueShow.getTemperature());
+                            multiLineMessage = "Temperature: " + sensorsValueShow.getTemperature() + "&lt;br&gt;" + multiLineMessage;
                             break;
                     }
                 }
@@ -1058,20 +1089,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
-                Log.w(TAG, "Failed to read Sensor value.", error.toException());
+                Log.w(TAG, "Failed to read SensorsValueShow value.", error.toException());
             }
         });
 
 
-        System.out.println("getBlinder: " + sensor.getBlinder());
-        System.out.println("getDoor: " + sensor.getDoor());
-        System.out.println("getHvac: " + sensor.getHvac());
-        System.out.println("getLight: " + sensor.getLight());
-        System.out.println("getTemperature: " + sensor.getTemperature());
+        System.out.println("getBlinder: " + sensorsValueShow.getBlinder());
+        System.out.println("getDoor: " + sensorsValueShow.getDoor());
+        System.out.println("getHvac: " + sensorsValueShow.getHvac());
+        System.out.println("getLight: " + sensorsValueShow.getLight());
+        System.out.println("getTemperature: " + sensorsValueShow.getTemperature());
 
         showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
 
-        return sensor;
+        return sensorsValueShow;
     }
 
     public DataChanges dataChangesFRD() {

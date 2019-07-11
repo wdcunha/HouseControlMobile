@@ -3,13 +3,13 @@ package pt.ipp.estg.housecontrol;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
-public class Sensor {
+public class SensorsValueShow {
 
-    private String 	blinder,  door, hvac, light, temperature;
+    private String 	blinder, door, hvac, light, temperature;
 
-    public Sensor() {}
+    public SensorsValueShow() {}
 
-    public Sensor(String blinder, String door, String hvac, String light, String temperature) {
+    public SensorsValueShow(String blinder, String door, String hvac, String light, String temperature) {
         this.temperature = temperature;
         this.blinder = blinder;
         this.door = door;
