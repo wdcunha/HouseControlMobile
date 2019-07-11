@@ -194,8 +194,7 @@ public class MainActivity extends AppCompatActivity {
                     userUid = myFirebaseUser.getUid();
 
                     writeNewUser(userUid, userName, userEmail);
-                    String token = getTokenFCM();
-                    writeNewToken(token, userName);
+                    writeNewToken(getTokenFCM()+"", userName);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
 
