@@ -2,17 +2,19 @@ package pt.ipp.estg.housecontrol;
 
 public class DataChanges {
 
-    private String 	blinder, door, hvac, light, temperature, timestamp;
+    private String 	blinder, door, hvac, light, temperature, timestamp, userId, userName;
 
     public DataChanges() {}
 
-    public DataChanges(String blinder, String door, String hvac, String light, String temperature, String timestamp) {
+    public DataChanges(String blinder, String door, String hvac, String light, String temperature, String timestamp, String userId, String userName) {
         this.temperature = temperature;
         this.blinder = blinder;
         this.door = door;
         this.light = light;
         this.hvac = hvac;
         this.timestamp = timestamp;
+        this.userId = userId;
+        this.userName = userName;
     }
 
     public String getTemperature() {
@@ -61,5 +63,21 @@ public class DataChanges {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

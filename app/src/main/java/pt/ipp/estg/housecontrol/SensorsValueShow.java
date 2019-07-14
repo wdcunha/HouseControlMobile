@@ -2,14 +2,16 @@ package pt.ipp.estg.housecontrol;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import pt.ipp.estg.housecontrol.Sensors.Sensor;
+
 @IgnoreExtraProperties
 public class SensorsValueShow {
 
-    private String 	blinder, door, hvac, light, temperature;
+    private Sensor blinder, door, hvac, light, temperature;
 
     public SensorsValueShow() {}
 
-    public SensorsValueShow(String blinder, String door, String hvac, String light, String temperature) {
+    public SensorsValueShow(Sensor blinder, Sensor door, Sensor hvac, Sensor light, Sensor temperature) {
         this.temperature = temperature;
         this.blinder = blinder;
         this.door = door;
@@ -17,43 +19,43 @@ public class SensorsValueShow {
         this.hvac = hvac;
     }
 
-    public String getTemperature() {
+    public Sensor getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(String temperature) {
+    public void setTemperature(Sensor temperature) {
         this.temperature = temperature;
     }
 
-    public String getBlinder() {
+    public Sensor getBlinder() {
         return blinder;
     }
 
-    public void setBlinder(String blinder) {
+    public void setBlinder(Sensor blinder) {
         this.blinder = blinder;
     }
 
-    public String getDoor() {
+    public Sensor getDoor() {
         return door;
     }
 
-    public void setDoor(String door) {
+    public void setDoor(Sensor door) {
         this.door = door;
     }
 
-    public String getLight() {
+    public Sensor getLight() {
         return light;
     }
 
-    public void setLight(String light) {
+    public void setLight(Sensor light) {
         this.light = light;
     }
 
-    public String getHvac() {
+    public Sensor getHvac() {
         return hvac;
     }
 
-    public void setHvac(String hvac) {
+    public void setHvac(Sensor hvac) {
         this.hvac = hvac;
     }
 }

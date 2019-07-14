@@ -34,7 +34,9 @@ import com.google.firebase.iid.InstanceIdResult;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pt.ipp.estg.housecontrol.Sensors.Door;
 import pt.ipp.estg.housecontrol.Sensors.HVAC;
@@ -163,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = myFirebaseAuth.getCurrentUser();
         Toast.makeText(MainActivity.this, "Current user: " + currentUser, Toast.LENGTH_LONG).show();
 //        updateUI(currentUser);
-        showDataTbox.setText("onStart");
 
     }
 
@@ -197,8 +198,12 @@ public class MainActivity extends AppCompatActivity {
                     userEmail = myFirebaseUser.getEmail();
                     userUid = myFirebaseUser.getUid();
 
+                    System.out.println("getSharedPreferences: "+ getSharedPreferences("newtoken", MODE_PRIVATE).getString("token", ""));
+
+                    Toast.makeText(MainActivity.this, "getSharedPreferences: "+ getSharedPreferences("newtoken", MODE_PRIVATE).getString("token", ""), Toast.LENGTH_LONG).show();
+
                     writeNewUser(userUid, userName, userEmail);
-                    writeNewToken(getTokenFCM(), userName);
+                    writeNewToken(getSharedPreferences("newtoken", MODE_PRIVATE).getString("token", ""), userName);
                 }
                 Toast.makeText(MainActivity.this, "User loged in: " + userName + "\n" + userEmail + "\n" + userUid, Toast.LENGTH_LONG).show();
 
@@ -262,8 +267,12 @@ public class MainActivity extends AppCompatActivity {
     public void showToken(View view) {
 
 //        showDataTbox.setText("Token is: "+ getTokenFCM());
-        showDataTbox.setText(getTokenFCM());
-        Log.d(TAG, "Token is: "+getTokenFCM());
+        String token = getTokenFCM();
+        showDataTbox.setText(token);
+        Log.d(TAG, "Token is: "+token);
+        getSharedPreferences("newtoken", MODE_PRIVATE).edit().putString("token",token).apply();
+        Toast.makeText(MainActivity.this, "getSharedPreferences: "+ getSharedPreferences("newtoken", MODE_PRIVATE).getString("token", ""), Toast.LENGTH_LONG).show();
+        writeNewToken(token, userName);
 
     }
 
@@ -576,21 +585,18 @@ public class MainActivity extends AppCompatActivity {
                             recbBlinderData = parseData(ds.getValue().toString());
                             System.out.println("----> recbBlinderData.getValue: "+ recbBlinderData.getValue());
 
-                            sensorsValueShow.setBlinder(String.valueOf(recbBlinderData.getValue()));
                             lblBlinder.setText(ds.getKey());
                             blinder.setText(String.valueOf(recbBlinderData.getValue()));
                             break;
                         case "door":
                             recbDoorData = parseData(ds.getValue().toString());
 
-                            sensorsValueShow.setDoor(String.valueOf(((Door)recbDoorData).isOpen()));
                             lablDoor.setText(ds.getKey());
                             door.setText(String.valueOf(((Door)recbDoorData).isOpen()));
                             break;
                         case "hvac":
                             recbHvacData = parseData(ds.getValue().toString());
 
-                            sensorsValueShow.setHvac("On/off: "+((HVAC)recbHvacData).isOn()+", Temp: "+recbHvacData.getValue());
                             lblHvac.setText(ds.getKey()+"(Temp)");
                             lblHvacIsOn.setText(ds.getKey()+"(On/off)");
                             hvac.setText(String.valueOf(recbHvacData.getValue()));
@@ -599,14 +605,12 @@ public class MainActivity extends AppCompatActivity {
                         case "light":
                             recbLightData = parseData(ds.getValue().toString());
 
-                            sensorsValueShow.setLight(String.valueOf(recbLightData.getValue()));
                             lblLight.setText(ds.getKey());
                             light.setText(String.valueOf(((Light)recbLightData).isOn()));
                             break;
                         case "temperature":
                             recbTemperaturerData = parseData(ds.getValue().toString());
 
-                            sensorsValueShow.setTemperature(String.valueOf(recbTemperaturerData.getValue()));
                             lblTemperature.setText(ds.getKey());
                             temperature.setText(String.valueOf(recbTemperaturerData.getValue()));
                             break;
@@ -709,6 +713,8 @@ public class MainActivity extends AppCompatActivity {
 
         recbBlinderData.setValue(parseInt(String.valueOf(blinder.getText())));
 
+        createSensorLog(recbBlinderData, "blinder");
+
         sensorRef.child("blinder").setValue(recbBlinderData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -726,6 +732,50 @@ public class MainActivity extends AppCompatActivity {
                 });
         saveBlinder.setSaveEnabled(false);
         saveBlinder.setVisibility(View.GONE);
+    }
+
+    public void createSensorLog(Sensor sensorValue, String node) {
+
+        DatabaseReference dataChangesRef = database.getReference("Log");
+        String blinderstr = null, doorstr = null, hvacstr = null, lightstr = null, temperaturestr = null;
+
+        switch (node){
+            case "blinder":
+                blinderstr = sensorValue.toString();
+                break;
+            case "door":
+                doorstr = sensorValue.toString();
+                break;
+            case "hvac":
+                hvacstr = sensorValue.toString();
+                break;
+            case "light":
+                lightstr = sensorValue.toString();
+                break;
+            case "temperature":
+                temperaturestr = sensorValue.toString();
+                break;
+        }
+
+        DataChanges createLog = new DataChanges(blinderstr, doorstr, hvacstr, lightstr, temperaturestr, getCurrentDate(), userUid, userName);
+
+        dataChangesRef.child(node).child(String.valueOf(recbBlinderData.getIdentifier())).push().setValue(createLog)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Write was successful!
+                        Toast.makeText(MainActivity.this, "Data Log was saved successfully! ", Toast.LENGTH_SHORT).show();
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(MainActivity.this, "Data Log saving failed!!! " + e, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
     }
 
     public void increaseDoor(View view) {
@@ -765,6 +815,8 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         ((Door)recbDoorData).setIsOpen(Boolean.parseBoolean(String.valueOf(door.getText())));
+
+        createSensorLog(recbDoorData, "door");
 
         sensorRef.child("door").setValue(recbDoorData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -820,6 +872,8 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         ((Light)recbLightData).setIsOn(Boolean.parseBoolean(String.valueOf(light.getText())));
+
+        createSensorLog(recbLightData, "light");
 
         sensorRef.child("light").setValue(recbLightData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -885,6 +939,8 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         recbTemperaturerData.setValue(parseInt(String.valueOf(temperature.getText())));
+
+        createSensorLog(recbTemperaturerData, "temperature");
 
         sensorRef.child("temperature").setValue(recbTemperaturerData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -952,6 +1008,8 @@ public class MainActivity extends AppCompatActivity {
 
         recbHvacData.setValue(parseInt(String.valueOf(hvac.getText())));
 
+        createSensorLog(recbHvacData, "hvac");
+
         sensorRef.child("hvac").setValue(recbHvacData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -1010,6 +1068,9 @@ public class MainActivity extends AppCompatActivity {
 
         ((HVAC)recbHvacData).setIsOn(Boolean.parseBoolean(String.valueOf(hvacIsOn.getText())));
 
+        createSensorLog(recbHvacData, "hvac");
+
+
         sensorRef.child("hvac").setValue(recbHvacData.toString())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -1037,19 +1098,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveAllSensorChangesToFRDClick(View view) {
 
+        recbBlinderData.setValue(parseInt(String.valueOf(blinder.getText())));
+        ((Door)recbDoorData).setIsOpen(Boolean.parseBoolean(String.valueOf(door.getText())));
+        ((Light)recbLightData).setIsOn(Boolean.parseBoolean(String.valueOf(light.getText())));
+        recbTemperaturerData.setValue(parseInt(String.valueOf(temperature.getText())));
 
-        saveAllSensorChangesToFRD((String) blinder.getText(), (String) door.getText(), (String) hvac.getText(), (String) hvacIsOn.getText(), (String) light.getText(), (String) temperature.getText());
+        recbHvacData.setValue(parseInt(String.valueOf(hvac.getText())));
+        ((HVAC)recbHvacData).setIsOn(Boolean.parseBoolean(String.valueOf(hvacIsOn.getText())));
+
+        saveAllSensorChangesToFRD(recbBlinderData, recbDoorData, recbHvacData, recbLightData, recbTemperaturerData);
 
     }
 
 
-    private void saveAllSensorChangesToFRD(String blinder, String door, String hvac, String hvacIsOn, String light, String temperature) {
+    private void saveAllSensorChangesToFRD(Sensor blinder, Sensor door, Sensor hvac, Sensor light, Sensor temperature) {
 
         SensorsValueShow sensorsValueShow = new SensorsValueShow(blinder, door, hvac, light, temperature);
 
-        createDataLogInFRD(blinder, door, hvac, light, temperature);
+        createDataLogInFRDHashMap(sensorsValueShow);
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Sensor").child("mobile");
 
         sensorRef.setValue(sensorsValueShow)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -1087,14 +1155,64 @@ public class MainActivity extends AppCompatActivity {
      * This method creates a Log to have an history of changes and write it in FRD
      */
 
-    private void createDataLogInFRD(String blinder, String door, String hvac, String light, String temperature) {
-
-        DataChanges createLog = new DataChanges(blinder, door, hvac, light, temperature, getCurrentDate());
-
-        System.out.println("userId: "+userUid);
-        System.out.println("timeStamp: "+getCurrentDate());
+    private void createDataLogInFRDHashMap(SensorsValueShow sensorsValueShow) {
 
         DatabaseReference dataChangesRef = database.getReference("Log");
+
+        String timestamp = getCurrentDate();
+
+        HashMap<String, Object> blinderHashData = new HashMap<>();
+        blinderHashData.put("blinder", sensorsValueShow.getBlinder().toString());
+        blinderHashData.put("userId", userUid);
+        blinderHashData.put("userName", userName);
+        blinderHashData.put("timestamp", timestamp);
+
+        HashMap<String, Object> doorHashData = new HashMap<>();
+        doorHashData.put("door", sensorsValueShow.getDoor().toString());
+        doorHashData.put("userId", userUid);
+        doorHashData.put("userName", userName);
+        doorHashData.put("timestamp", timestamp);
+
+        HashMap<String, Object> hvacHashData = new HashMap<>();
+        hvacHashData.put("hvac", sensorsValueShow.getHvac().toString());
+        hvacHashData.put("userId", userUid);
+        hvacHashData.put("userName", userName);
+        hvacHashData.put("timestamp", timestamp);
+
+        HashMap<String, Object> lightHashData = new HashMap<>();
+        lightHashData.put("light", sensorsValueShow.getLight().toString());
+        lightHashData.put("userId", userUid);
+        lightHashData.put("userName", userName);
+        lightHashData.put("timestamp", timestamp);
+
+        HashMap<String, Object> temperatureHashData = new HashMap<>();
+        temperatureHashData.put("temperature", sensorsValueShow.getTemperature().toString());
+        temperatureHashData.put("userId", userUid);
+        temperatureHashData.put("userName", userName);
+        temperatureHashData.put("timestamp", timestamp);
+
+        String keyBlinder = dataChangesRef.child("blinder").push().getKey();
+        String keyDoor = dataChangesRef.child("door").push().getKey();
+        String keyHvac = dataChangesRef.child("hvac").push().getKey();
+        String keyLight = dataChangesRef.child("light").push().getKey();
+        String keyTemperature = dataChangesRef.child("temperature").push().getKey();
+
+        Map<String, Object> logAllToBeUpdated = new HashMap<>();
+        logAllToBeUpdated.put("/blinder/" + sensorsValueShow.getBlinder().getIdentifier() + "/" + keyBlinder, blinderHashData);
+        logAllToBeUpdated.put("/door/" + sensorsValueShow.getDoor().getIdentifier()  + "/" +  keyDoor, doorHashData);
+        logAllToBeUpdated.put("/hvac/" +  sensorsValueShow.getHvac().getIdentifier() + "/" + keyHvac, hvacHashData);
+        logAllToBeUpdated.put("/light/" +  sensorsValueShow.getLight().getIdentifier() + "/" + keyLight, lightHashData);
+        logAllToBeUpdated.put("/temperature/" +  sensorsValueShow.getTemperature().getIdentifier() + "/" + keyTemperature, temperatureHashData);
+        dataChangesRef.updateChildren(logAllToBeUpdated);
+
+    }
+
+    private void createDataLogInFRSetValue(String blinder, String door, String hvac, String light, String temperature) {
+
+
+        DatabaseReference dataChangesRef = database.getReference("Log");
+
+        DataChanges createLog = new DataChanges(blinder, door, hvac, light, temperature, getCurrentDate(), userUid, userName);
 
         dataChangesRef.child(userUid).setValue(createLog)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -1113,7 +1231,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     /***************************************************************************************************
      *
@@ -1135,52 +1252,40 @@ public class MainActivity extends AppCompatActivity {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()){
 
-//                    SensorsValueShow sensorDataFRD = ds.getValue(SensorsValueShow.class);
-//                    System.out.println("Temperature: " + sensorDataFRD.getTemperature());
-//                    multiLineMessage = "Temperature: " + sensorDataFRD.getTemperature() + "&lt;br&gt;" + multiLineMessage;
-//                    System.out.println("Blinder: " + sensorDataFRD.getBlinder());
-//                    multiLineMessage = "Blinder: " + sensorDataFRD.getBlinder() + "&lt;br&gt;" + multiLineMessage;
-//                    System.out.println("Door: " + sensorDataFRD.getDoor());
-//                    multiLineMessage = "Door: " + sensorDataFRD.getDoor() + "&lt;br&gt;" + multiLineMessage;
-//                    System.out.println("Light: " + sensorDataFRD.getLight());
-//                    multiLineMessage = "Light: " + sensorDataFRD.getLight() + "&lt;br&gt;" + multiLineMessage;
-//                    System.out.println("Hvac: " + sensorDataFRD.getHvac());
-//                    multiLineMessage = "Light: " + sensorDataFRD.getLight() + "&lt;br&gt;" + multiLineMessage;
-
-//                    System.out.println("getKey: " + ds.getKey());
-//                    multiLineMessage = multiLineMessage + "&lt;br&gt;" + "getKey: " + ds.getKey();
-//                    System.out.println("getValue: " + ds.getValue());
-//                    multiLineMessage = multiLineMessage + "&lt;br&gt;" + "getValue: " + ds.getValue();
-
-//                    showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
-
                     switch (ds.getKey()){
                         case "blinder":
-                            sensorsValueShow.setBlinder(ds.getValue().toString());
-                            System.out.println("switchgetBlinder: " + sensorsValueShow.getBlinder());
-                            multiLineMessage = "Blinder: " + sensorsValueShow.getBlinder() + "&lt;br&gt;" + multiLineMessage;
+                            recbBlinderData = parseData(ds.getValue().toString());
+//                            sensorsValueShow.setBlinder(String.valueOf(recbBlinderData.getValue()));
+//                            System.out.println("switchgetBlinder: " + sensorsValueShow.getBlinder());
+                            multiLineMessage = "Blinder: " + recbBlinderData.getValue() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "door":
-                            sensorsValueShow.setDoor(ds.getValue().toString());
-                            System.out.println("switchgetDoor: " + sensorsValueShow.getDoor());
-                            multiLineMessage = "Door: " + sensorsValueShow.getDoor() + "&lt;br&gt;" + multiLineMessage;
+                            recbDoorData = parseData(ds.getValue().toString());
+
+//                            sensorsValueShow.setDoor(String.valueOf(((Door)recbDoorData).isOpen()));
+//                            System.out.println("switchgetDoor: " + sensorsValueShow.getDoor());
+                            multiLineMessage = "Door: " + ((Door)recbDoorData).isOpen() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "hvac":
-                            sensorsValueShow.setHvac(ds.getValue().toString());
-                            System.out.println("switchgetHvac: " + sensorsValueShow.getHvac());
-                            multiLineMessage = "Hvac: " + sensorsValueShow.getHvac() + "&lt;br&gt;" + multiLineMessage;
+                            recbHvacData = parseData(ds.getValue().toString());
+
+//                            sensorsValueShow.setHvac("On/off: "+((HVAC)recbHvacData).isOn()+", Temp: "+recbHvacData.getValue());
+//                            System.out.println("switchgetHvac: " + sensorsValueShow.getHvac());
+                            multiLineMessage = "Hvac (On/off): " + ((HVAC)recbHvacData).isOn()  + ", Temp: "+recbHvacData.getValue() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "light":
-                            sensorsValueShow.setLight(ds.getValue().toString());
-                            System.out.println("switchgetLight: " + sensorsValueShow.getLight());
-                            multiLineMessage = "Light: " + sensorsValueShow.getLight() + "&lt;br&gt;" + multiLineMessage;
+                            recbLightData = parseData(ds.getValue().toString());
+
+//                            sensorsValueShow.setLight(String.valueOf(recbLightData.getValue()));
+//                            System.out.println("switchgetLight: " + sensorsValueShow.getLight());
+                            multiLineMessage = "Light: " + recbLightData.getValue() + "&lt;br&gt;" + multiLineMessage;
                             break;
                         case "temperature":
-//                            MainActivity.this.sensorsValueShow.setTemperature(ds.getValue().toString());
-//                            showDataTbox.setText(ds.getValue().toString());
-                            sensorsValueShow.setTemperature(ds.getValue().toString());
-                            System.out.println("switchgetTemperature: " + sensorsValueShow.getTemperature());
-                            multiLineMessage = "Temperature: " + sensorsValueShow.getTemperature() + "&lt;br&gt;" + multiLineMessage;
+                            recbTemperaturerData = parseData(ds.getValue().toString());
+
+//                            sensorsValueShow.setTemperature(String.valueOf(recbTemperaturerData.getValue()));
+//                            System.out.println("switchgetTemperature: " + sensorsValueShow.getTemperature());
+                            multiLineMessage = "Temperature: " + recbTemperaturerData.getValue() + "&lt;br&gt;" + multiLineMessage;
                             break;
                     }
                 }
@@ -1194,7 +1299,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read SensorsValueShow value.", error.toException());
             }
         });
-
 
         System.out.println("getBlinder: " + sensorsValueShow.getBlinder());
         System.out.println("getDoor: " + sensorsValueShow.getDoor());

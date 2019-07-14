@@ -68,7 +68,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //        super.onMessageReceived(remoteMessage);
 //        showNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody());
 
-
     }
 
     @Override
