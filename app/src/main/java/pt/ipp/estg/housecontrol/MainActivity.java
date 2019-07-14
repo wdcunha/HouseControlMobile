@@ -433,10 +433,10 @@ public class MainActivity extends AppCompatActivity {
 
     /***************************************************************************************************
      *
-     * get datas from FRD and show on screen's app
+     *   Set true and false fields and buttons that need to be shown or hiden
+     *   and get datas of log from FRD and shows it the field showDataTbox on the screen's app
      *
      */
-
 
     public void getDataFRD(View view) {
 
@@ -509,6 +509,10 @@ public class MainActivity extends AppCompatActivity {
 
         multiLineMessage = "";
 
+        /**
+         * This var assignment below is the responsible to load data that comes from the
+         * method readSensorsFRD
+         */
         SensorsValueShow sen = readSensorsFRD();
 
     }
@@ -1234,59 +1238,42 @@ public class MainActivity extends AppCompatActivity {
 
     /***************************************************************************************************
      *
-     * Code for reading infos from existing in FRD and show them on screen app
+     *    Code for reading infos from existing in FRD and show them on screen app
      */
 
     public SensorsValueShow readSensorsFRD() {
 
-        DatabaseReference sensorRef = database.getReference("Sensor");
+        DatabaseReference sensorRef = database.getReference("Log");
 
         sensorsValueShow = new SensorsValueShow();
 
-        sensorRef.child("server").addValueEventListener(new ValueEventListener() {
+        multiLineMessage = "";
+
+        sensorRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()){
 
-                    switch (ds.getKey()){
-                        case "blinder":
-                            recbBlinderData = parseData(ds.getValue().toString());
-//                            sensorsValueShow.setBlinder(String.valueOf(recbBlinderData.getValue()));
-//                            System.out.println("switchgetBlinder: " + sensorsValueShow.getBlinder());
-                            multiLineMessage = "Blinder: " + recbBlinderData.getValue() + "&lt;br&gt;" + multiLineMessage;
-                            break;
-                        case "door":
-                            recbDoorData = parseData(ds.getValue().toString());
+                    multiLineMessage = multiLineMessage + "--> Tipo " + ds.getKey() + "&lt;br&gt;";
 
-//                            sensorsValueShow.setDoor(String.valueOf(((Door)recbDoorData).isOpen()));
-//                            System.out.println("switchgetDoor: " + sensorsValueShow.getDoor());
-                            multiLineMessage = "Door: " + ((Door)recbDoorData).isOpen() + "&lt;br&gt;" + multiLineMessage;
-                            break;
-                        case "hvac":
-                            recbHvacData = parseData(ds.getValue().toString());
+                    for(DataSnapshot ds_level2 : ds.getChildren()){
 
-//                            sensorsValueShow.setHvac("On/off: "+((HVAC)recbHvacData).isOn()+", Temp: "+recbHvacData.getValue());
-//                            System.out.println("switchgetHvac: " + sensorsValueShow.getHvac());
-                            multiLineMessage = "Hvac (On/off): " + ((HVAC)recbHvacData).isOn()  + ", Temp: "+recbHvacData.getValue() + "&lt;br&gt;" + multiLineMessage;
-                            break;
-                        case "light":
-                            recbLightData = parseData(ds.getValue().toString());
+                        String ds_level2key = ds_level2.getKey();
 
-//                            sensorsValueShow.setLight(String.valueOf(recbLightData.getValue()));
-//                            System.out.println("switchgetLight: " + sensorsValueShow.getLight());
-                            multiLineMessage = "Light: " + recbLightData.getValue() + "&lt;br&gt;" + multiLineMessage;
-                            break;
-                        case "temperature":
-                            recbTemperaturerData = parseData(ds.getValue().toString());
+                        multiLineMessage = multiLineMessage + "Ident: " + ds_level2key + "&lt;br&gt;";
+                        multiLineMessage = multiLineMessage + "+-------------------------------------------------------------------" +  "&lt;br&gt;";
 
-//                            sensorsValueShow.setTemperature(String.valueOf(recbTemperaturerData.getValue()));
-//                            System.out.println("switchgetTemperature: " + sensorsValueShow.getTemperature());
-                            multiLineMessage = "Temperature: " + recbTemperaturerData.getValue() + "&lt;br&gt;" + multiLineMessage;
-                            break;
+                        for (DataSnapshot dsl3 : ds_level2.getChildren()) {
+
+                            for (DataSnapshot dsl4 : dsl3.getChildren()) {
+                                String dsl4key = dsl4.getKey();
+                                String dsl4Value = dsl4.getValue().toString();
+                                multiLineMessage = multiLineMessage + dsl4key + ": " + dsl4Value + "&lt;br&gt;";
+
+                            }
+                            multiLineMessage = multiLineMessage + "|-------------------------------------------------------------------" +  "&lt;br&gt;";
+                        }
                     }
                 }
                     showDataTbox.setText(Html.fromHtml(Html.fromHtml(multiLineMessage).toString()));
